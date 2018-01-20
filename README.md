@@ -3,8 +3,10 @@ Python generator for vanity addresses
 
 This allows you to quickly and easily generate public addresses that contain substrings that you would like to have.
 
+```
 > python3 VanityAddress.py [-c] substring
 - Generates NEO addresses that contain your desired substring. Use -c if you want case sensitivity or leave it out if not.
+```
 
 === Brief Explanation ===
 
