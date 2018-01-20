@@ -1,11 +1,15 @@
+"""
+    Generates addresses matching your specific requirements
+    Time taken largely dependent on the length of the string you want
+    > python3 VanityGenerator.py -c Win
+"""
+
 from KeyPair import KeyPair
+import argparse
 import time
 import logging
 
-
-
-
-def generate_address(contains=None, startsWith=None, endsWith=None, caseSensitive=True):
+def generate_address(contains=None, caseSensitive=False):
     logging.basicConfig(filename='finds.log', level=logging.DEBUG)
     logging.info("Starting search now")
 
@@ -14,8 +18,6 @@ def generate_address(contains=None, startsWith=None, endsWith=None, caseSensitiv
 
     if not caseSensitive:
         contains = None if contains == None else contains.lower()
-        startsWith = None if startsWith == None else startsWith.lower()
-        endsWith = None if endsWith == None else endsWith.lower()
 
     while True:
         KP = KeyPair()
@@ -34,12 +36,15 @@ def generate_address(contains=None, startsWith=None, endsWith=None, caseSensitiv
         if contains and contains not in addr:
             continue
 
-        if startsWith and addr[0:len(startsWith)] != startsWith:
-            continue
+        print("{},{}".format(addr, KP.WIF))
+        logging.debug("{},{}".format(addr, KP.WIF))
 
-        if endsWith and addr[-len(endsWith):] != endsWith:
-            continue
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("substring", type=str,
+                        help="finds addresses that contain your desired substring")
+    parser.add_argument("-c", "--case", default=0, action='count',
+                        help="case sensitivity. Default is false")
+    args = parser.parse_args()
 
-        print("{},{}".format(addr, KP.Export()))
-        logging.debug("{},{}".format(addr, KP.Export()))
-generate_address(contains="Wing", caseSensitive=False)
+    generate_address(contains=args.substring, caseSensitive=(args.case!=0))

@@ -1,15 +1,37 @@
 #Generate Public Key from Private Key
 
+# Optimised for speed by reducing amount of library bloat needed
+
 # WIF: Human Readable private key e.g. 5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ
 # PublicKeyReadable: Human readable public key
 
+import os
 import bitcoin
 import base58
-import hashlib
+import hashlib # comes with standard python implementation
+import binascii # comes with standard python implementation
 from ECCurve import ECDSA
-import binascii
-from UInt160 import UInt160
-from Helper import RandomBytes
+from UInt160 import UInt160 # useful representation used in bitcoin / NEO
+
+
+def random_bytes(nBytes):
+    return os.urandom(nBytes)
+
+
+def setup_curve():
+    """
+    Setup the Elliptic curve parameters.
+    """
+    bitcoin.change_curve(
+        115792089210356248762697446949407573530086143415290314195533631308867097853951,
+        115792089210356248762697446949407573529996955224135760342422259061068512044369,
+        115792089210356248762697446949407573530086143415290314195533631308867097853948,
+        41058363725152142129326129780047268409114441015993725554835256314039467401291,
+        48439561293906451759052585252797914202762949526041747995844080717082404635286,
+        36134250956749795798585127919587881956611106672985015071877198253568414405109
+    )
+
+setup_curve()
 
 
 class KeyPair():
@@ -20,20 +42,6 @@ class KeyPair():
         s = "Address: {}\n".format(self.GetAddress())
         s += "WIF: {}\n".format(self.Export())
         return s
-
-    def setup_curve(self):
-        """
-        Setup the Elliptic curve parameters.
-        """
-        bitcoin.change_curve(
-            115792089210356248762697446949407573530086143415290314195533631308867097853951,
-            115792089210356248762697446949407573529996955224135760342422259061068512044369,
-            115792089210356248762697446949407573530086143415290314195533631308867097853948,
-            41058363725152142129326129780047268409114441015993725554835256314039467401291,
-            48439561293906451759052585252797914202762949526041747995844080717082404635286,
-            36134250956749795798585127919587881956611106672985015071877198253568414405109
-            )
-
 
     @staticmethod
     def scripthash_to_address(scripthash):
@@ -61,7 +69,7 @@ class KeyPair():
         data[1:33] = self.PrivateKey[0:32]
         data[33] = 0x01
 
-        checksum = self.checksum_generator(data[0:34])
+        checksum = KeyPair.checksum_generator(data[0:34])
         data[34:38] = checksum[0:4]
         b58 = base58.b58encode(bytes(data))
 
@@ -129,7 +137,7 @@ class KeyPair():
         """
         Returns the public NEO address for this KeyPair
         Returns:
-            str: The private key
+            str: The human readable Public Address from the public key
         """
         script = b'21' + self.PublicKey.encode_point(True) + b'ac'
         script_hash = KeyPair.ToScriptHash(script)
@@ -143,9 +151,8 @@ class KeyPair():
         """
 
         if priv_key is None:
-            priv_key = bytes(RandomBytes(32))
+            priv_key = bytes(random_bytes(32))
 
-        self.setup_curve()
         length = len(priv_key)
 
         if length != 32: # Just handle 32 byte version
@@ -165,22 +172,3 @@ class KeyPair():
             puby = pubkey_points[1]
             edcsa = ECDSA.secp256r1()
             self.PublicKey = edcsa.Curve.point(pubx, puby)
-
-        #self.PublicKeyHash = self.ToScriptHash(self.PublicKey.encode_point(True))
-
-    def Export(self):
-        """
-        Export this KeyPair's private key in WIF format.
-        Returns:
-            str: The key in wif format
-        """
-        data = bytearray(38)
-        data[0] = 0x80
-        data[1:33] = self.PrivateKey[0:32]
-        data[33] = 0x01
-
-        checksum = KeyPair.checksum_generator(data[0:34])
-        data[34:38] = checksum[0:4]
-        b58 = base58.b58encode(bytes(data))
-
-        return b58
