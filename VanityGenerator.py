@@ -28,7 +28,7 @@ def generate_address(contains=None, startsWith=None, endsWith=None, caseSensitiv
         if not caseSensitive:
             new_addr = addr.lower()
 
-        if count % 1000 == 0:
+        if count % 10000 == 0:
             print("C: {} T: {}".format(count, time.time()-start))
 
         if contains and contains not in addr:
