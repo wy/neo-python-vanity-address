@@ -1,7 +1,14 @@
 from KeyPair import KeyPair
 import time
+import logging
+
+
+
 
 def generate_address(contains=None, startsWith=None, endsWith=None, caseSensitive=True):
+    logging.basicConfig(filename='finds.log', level=logging.DEBUG)
+    logging.info("Starting search now")
+
     count = 0
     start = time.time()
 
@@ -34,5 +41,5 @@ def generate_address(contains=None, startsWith=None, endsWith=None, caseSensitiv
             continue
 
         print("{},{}".format(addr, KP.Export()))
-
+        logging.debug("{},{}".format(addr, KP.Export()))
 generate_address(contains="Wing", caseSensitive=False)
