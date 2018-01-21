@@ -23,6 +23,15 @@ The script will output the public address as well as the WIF (wallet import form
 Where possible, I have tried not to import libraries unnecessarily. In the latest version you will need to pip install the following libraries:
 - bitcoin - this is a library for applying the cryptographic process (shared with bitcoin and NEO)
 - base58 - a helper library for dealing with base58 strings
+- mpmath - fixed point math
+- logzero - logging debug (I could probably edit this out)
+
+```
+> pip3 install bitcoin
+> pip3 install base58
+> pip3 install mpmath
+> pip3 install logzero
+```
 
 For security reasons, you should audit the code to be confident there is no access online to any data being produced. As there are very few python files and only two external non-library imports, this should be easy to do.
 
